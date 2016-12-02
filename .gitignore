@@ -45,3 +45,8 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+
+bin/
+obj/
+BenchmarkDotNet.Artifacts/
+src/BoxingTest/project.lock.json
