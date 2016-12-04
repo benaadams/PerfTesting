@@ -28,6 +28,12 @@ namespace BoxTest
         {
             return (i >= -128 && i < 128) ? BoxedIntegers[i + 128] : (object)i;
         }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]		
+        public static object NoInlineBox(int i)
+        {
+            return (i >= -128 && i < 128) ? BoxedIntegers[i + 128] : (object)i;
+        }
     }
 
     [Config(typeof(CoreConfig))]
@@ -64,7 +70,7 @@ namespace BoxTest
         }
 
         [Benchmark(OperationsPerInvoke = InnerLoopCount)]
-        public void Int32CachedBoxExtenstion()
+        public void Int32CachedNoInlineBoxing()
         {
             for (var loop = 0; loop < 2000; loop++)
             {
@@ -76,11 +82,25 @@ namespace BoxTest
             }
         }
 
+        [Benchmark(OperationsPerInvoke = InnerLoopCount)]
+        public void Int32CachedBoxExtenstion()
+        {
+            for (var loop = 0; loop < 2000; loop++)
+            {
+                var boxes = Boxes;
+                for (var i = 0; i < boxes.Length; i++)
+                {
+                    boxes[i] = Int32Extensions.NoInlineBox(i - 128);
+                }
+            }
+        }
+		
         [Setup]
         public void Setup()
         {
             Int32Extensions.BoxExplict(1);
             1.Box();
+            Int32Extensions.NoInlineBox(1);
         }
     }
 
