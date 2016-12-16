@@ -312,6 +312,18 @@ namespace DispatchTest
             return returnVal;
         }
 
+        [Benchmark(OperationsPerInvoke = InnerLoopCount)]
+        public int InterfaceGenericConstraint()
+        {
+            var returnVal = 0;
+            for (var loop = 0; loop < 2000; loop++)
+            {
+                returnVal += IListGenericConstraintLoop(_array);
+                returnVal += IListGenericConstraintLoop(_list);
+            }
+            return returnVal;
+        }
+
         private static int ListLoop(List<int> list)
         {
             var returnVal = 0;
@@ -594,6 +606,17 @@ namespace DispatchTest
                 return ListLoop(list);
             }
             return IListGeneralLoop(ilist);
+        }
+
+        private static int IListGenericConstraintLoop<T>(T list) where T : IList<int>
+        {
+            var returnVal = 0;
+            var count = list.Count;
+            for (var i = 0; i < count; i++)
+            {
+                returnVal = list[i];
+            }
+            return returnVal;
         }
 
         private static int IListLoopAsCast(IList<int> ilist)
