@@ -1,0 +1,29 @@
+{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "emitEntryPoint": true
+  },
+
+
+  "dependencies": {
+    "BenchmarkDotNet": "0.10.1",
+    "System.Runtime.CompilerServices.Unsafe": "4.3.0"
+  },
+
+  "frameworks": {
+    "netcoreapp1.1": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "version": "1.1.0-*",
+          "type": "platform"
+        }
+      }
+    }
+  },
+
+  "runtimeOptions": {
+    "configProperties": {
+      "System.GC.Server": true
+    }
+  }
+}
