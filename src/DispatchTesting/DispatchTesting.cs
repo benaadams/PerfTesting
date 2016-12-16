@@ -78,7 +78,7 @@ namespace DispatchTest
     [Config(typeof(CoreConfig))]
     public class DispatchTesting
     {
-        private const int InnerLoopCount = 256 * 2000;
+        private const int InnerLoopCount = 2000;
 
         private static readonly int[] _array = new int[256];
         private static readonly List<int> _list = new List<int>(_array);
@@ -111,10 +111,14 @@ namespace DispatchTest
         public int Direct()
         {
             var returnVal = 0;
-            for (var loop = 0; loop < 2000; loop++)
+            for (var loop = 0; loop < InnerLoopCount; loop++)
             {
-                returnVal += ArrayLoop(_array);
-                returnVal += ListLoop(_list);
+                var count = _array.Length;
+                for (var i = 0; i < count; i++)
+                    returnVal += ArrayLoop(_array, i);
+                count = _list.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += ListLoop(_list, i);
             }
             return returnVal;
         }
@@ -123,10 +127,14 @@ namespace DispatchTest
         public int DirectWrapper()
         {
             var returnVal = 0;
-            for (var loop = 0; loop < 2000; loop++)
+            for (var loop = 0; loop < InnerLoopCount; loop++)
             {
-                returnVal += ArrayListDirectLoop(_arrayListDirect);
-                returnVal += ListListDirectLoop(_listListDirect);
+               var  count = _arrayListDirect.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += ArrayListDirectLoop(_arrayListDirect, i);
+                count = _listListDirect.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += ListListDirectLoop(_listListDirect, i);
             }
             return returnVal;
         }
@@ -135,10 +143,14 @@ namespace DispatchTest
         public int DirectSealedWrapper()
         {
             var returnVal = 0;
-            for (var loop = 0; loop < 2000; loop++)
+            for (var loop = 0; loop < InnerLoopCount; loop++)
             {
-                returnVal += ArrayListDirectSealedLoop(_arrayListDirectSealed);
-                returnVal += ListListDirectSealedLoop(_listListDirectSealed);
+                var count = _arrayListDirectSealed.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += ArrayListDirectSealedLoop(_arrayListDirectSealed, i);
+                count = _listListDirectSealed.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += ListListDirectSealedLoop(_listListDirectSealed, i);
             }
             return returnVal;
         }
@@ -147,10 +159,14 @@ namespace DispatchTest
         public int DirectVirtualWrapper()
         {
             var returnVal = 0;
-            for (var loop = 0; loop < 2000; loop++)
+            for (var loop = 0; loop < InnerLoopCount; loop++)
             {
-                returnVal += ArrayListDirectVirtualLoop(_arrayDerivedList);
-                returnVal += ListListDirectVirtualLoop(_listDerivedList);
+                var count = _arrayDerivedList.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += ArrayListDirectVirtualLoop(_arrayDerivedList, i);
+                count = _listDerivedList.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += ListListDirectVirtualLoop(_listDerivedList, i);
             }
             return returnVal;
         }
@@ -159,10 +175,14 @@ namespace DispatchTest
         public int DirectVirtualSealedWrapper()
         {
             var returnVal = 0;
-            for (var loop = 0; loop < 2000; loop++)
+            for (var loop = 0; loop < InnerLoopCount; loop++)
             {
-                returnVal += ArrayListDirectVirtualSealedLoop(_arrayDerivedListSealed);
-                returnVal += ListListDirectVirtualSealedLoop(_listDerivedListSealed);
+                var count = _arrayDerivedListSealed.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += ArrayListDirectVirtualSealedLoop(_arrayDerivedListSealed, i);
+                count = _listDerivedListSealed.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += ListListDirectVirtualSealedLoop(_listDerivedListSealed, i);
             }
             return returnVal;
         }
@@ -171,10 +191,14 @@ namespace DispatchTest
         public int DirectBaseWrapper()
         {
             var returnVal = 0;
-            for (var loop = 0; loop < 2000; loop++)
+            for (var loop = 0; loop < InnerLoopCount; loop++)
             {
-                returnVal += DirectBaseWrapperLoop(_listVirtual);
-                returnVal += DirectBaseWrapperLoop(_listVirtual);
+                var count = _listVirtual.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += DirectBaseWrapperLoop(_listVirtual, i);
+                count = _listVirtual.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += DirectBaseWrapperLoop(_listVirtual, i);
             }
             return returnVal;
         }
@@ -183,10 +207,14 @@ namespace DispatchTest
         public int DirectBaseNotDerivedWrapper()
         {
             var returnVal = 0;
-            for (var loop = 0; loop < 2000; loop++)
+            for (var loop = 0; loop < InnerLoopCount; loop++)
             {
-                returnVal += DirectBaseNotDerivedWrapperLoop(_listVirtualNotDerived);
-                returnVal += DirectBaseNotDerivedWrapperLoop(_listVirtualNotDerived);
+                var count = _listVirtualNotDerived.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += DirectBaseNotDerivedWrapperLoop(_listVirtualNotDerived, i);
+                count = _listVirtualNotDerived.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += DirectBaseNotDerivedWrapperLoop(_listVirtualNotDerived, i);
             }
             return returnVal;
         }
@@ -195,10 +223,14 @@ namespace DispatchTest
         public int ViaBaseDerivedWrapperMonomorophic()
         {
             var returnVal = 0;
-            for (var loop = 0; loop < 2000; loop++)
+            for (var loop = 0; loop < InnerLoopCount; loop++)
             {
-                returnVal += ArrayListViaBaseDerivedWrapperLoop(_baseArrayDerivedList);
-                returnVal += ListListViaBaseDerivedWrapperLoop(_baseListDerivedList);
+                var count = _baseArrayDerivedList.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += ArrayListViaBaseDerivedWrapperLoop(_baseArrayDerivedList, i);
+                count = _baseListDerivedList.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += ListListViaBaseDerivedWrapperLoop(_baseListDerivedList, i);
             }
             return returnVal;
         }
@@ -207,10 +239,14 @@ namespace DispatchTest
         public int ViaBaseDerivedWrapperPolymorophic()
         {
             var returnVal = 0;
-            for (var loop = 0; loop < 2000; loop++)
+            for (var loop = 0; loop < InnerLoopCount; loop++)
             {
-                returnVal += ViaBaseDerivedWrapperLoop(_baseArrayDerivedList);
-                returnVal += ViaBaseDerivedWrapperLoop(_baseListDerivedList);
+                var count = _baseArrayDerivedList.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += ViaBaseDerivedWrapperLoop(_baseArrayDerivedList, i);
+                count = _baseListDerivedList.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += ViaBaseDerivedWrapperLoop(_baseListDerivedList, i);
             }
             return returnVal;
         }
@@ -219,10 +255,14 @@ namespace DispatchTest
         public int ViaBaseDerivedSealedWrapperMonomorophic()
         {
             var returnVal = 0;
-            for (var loop = 0; loop < 2000; loop++)
+            for (var loop = 0; loop < InnerLoopCount; loop++)
             {
-                returnVal += ArrayListViaBaseDerivedSealedWrapperLoop(_baseArrayDerivedListSealed);
-                returnVal += ListListViaBaseDerivedSealedWrapperLoop(_baseListDerivedListSealed);
+                var count = _baseArrayDerivedListSealed.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += ArrayListViaBaseDerivedSealedWrapperLoop(_baseArrayDerivedListSealed, i);
+                count = _baseListDerivedListSealed.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += ListListViaBaseDerivedSealedWrapperLoop(_baseListDerivedListSealed, i);
             }
             return returnVal;
         }
@@ -231,10 +271,14 @@ namespace DispatchTest
         public int ManualDerivedWrapperPolymorphic()
         {
             var returnVal = 0;
-            for (var loop = 0; loop < 2000; loop++)
+            for (var loop = 0; loop < InnerLoopCount; loop++)
             {
-                returnVal += ManualDerivedWrapperPolymorphicLoop(_baseArrayDerivedList);
-                returnVal += ManualDerivedWrapperPolymorphicLoop(_baseListDerivedList);
+                var count = _baseArrayDerivedList.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += ManualDerivedWrapperPolymorphicLoop(_baseArrayDerivedList, i);
+                count = _baseListDerivedList.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += ManualDerivedWrapperPolymorphicLoop(_baseListDerivedList, i);
             }
             return returnVal;
         }
@@ -243,10 +287,14 @@ namespace DispatchTest
         public int ManualDerivedSealedWrapperPolymorphic()
         {
             var returnVal = 0;
-            for (var loop = 0; loop < 2000; loop++)
+            for (var loop = 0; loop < InnerLoopCount; loop++)
             {
-                returnVal += ManualDerivedSealedWrapperPolymorphicLoop(_baseArrayDerivedListSealed);
-                returnVal += ManualDerivedSealedWrapperPolymorphicLoop(_baseListDerivedListSealed);
+                var count = _baseArrayDerivedListSealed.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += ManualDerivedSealedWrapperPolymorphicLoop(_baseArrayDerivedListSealed, i);
+                count = _baseListDerivedListSealed.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += ManualDerivedSealedWrapperPolymorphicLoop(_baseListDerivedListSealed, i);
             }
             return returnVal;
         }
@@ -255,10 +303,14 @@ namespace DispatchTest
         public int RuntimeInterfaceMonomorphic()
         {
             var returnVal = 0;
-            for (var loop = 0; loop < 2000; loop++)
+            for (var loop = 0; loop < InnerLoopCount; loop++)
             {
-                returnVal += IListLoopArrayOnly(_iArray);
-                returnVal += IListLoopListOnly(_iList);
+                var count = _iArray.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += IListLoopArrayOnly(_iArray, i);
+                count = _iList.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += IListLoopListOnly(_iList, i);
             }
             return returnVal;
         }
@@ -267,10 +319,14 @@ namespace DispatchTest
         public int RuntimeInterfacePolymorphic()
         {
             var returnVal = 0;
-            for (var loop = 0; loop < 2000; loop++)
+            for (var loop = 0; loop < InnerLoopCount; loop++)
             {
-                returnVal += IListLoop(_iArray);
-                returnVal += IListLoop(_iList);
+                var count = _iArray.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += IListLoop(_iArray, i);
+                count = _iList.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += IListLoop(_iList, i);
             }
             return returnVal;
         }
@@ -279,10 +335,14 @@ namespace DispatchTest
         public int DirectInterfaceAsCast()
         {
             var returnVal = 0;
-            for (var loop = 0; loop < 2000; loop++)
+            for (var loop = 0; loop < InnerLoopCount; loop++)
             {
-                returnVal += ArrayLoop(_iArray as int[]);
-                returnVal += ListLoop(_iList as List<int>);
+                var count = _iArray.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += ArrayLoop(_iArray as int[], i);
+                count = _iList.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += ListLoop(_iList as List<int>, i);
             }
             return returnVal;
         }
@@ -292,10 +352,14 @@ namespace DispatchTest
         public int ManualInterfaceMonomorphic()
         {
             var returnVal = 0;
-            for (var loop = 0; loop < 2000; loop++)
+            for (var loop = 0; loop < InnerLoopCount; loop++)
             {
-                returnVal += IListArrayLoopAsCast(_iArray);
-                returnVal += IListListLoopAsCast(_iList);
+                var count = _iArray.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += IListArrayLoopAsCast(_iArray, i);
+                count = _iList.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += IListListLoopAsCast(_iList, i);
             }
             return returnVal;
         }
@@ -304,10 +368,14 @@ namespace DispatchTest
         public int ManualInterfacePolymorphic()
         {
             var returnVal = 0;
-            for (var loop = 0; loop < 2000; loop++)
+            for (var loop = 0; loop < InnerLoopCount; loop++)
             {
-                returnVal += IListLoopAsCast(_iArray);
-                returnVal += IListLoopAsCast(_iList);
+                var count = _iArray.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += IListLoopAsCast(_iArray, i);
+                count = _iList.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += IListLoopAsCast(_iList, i);
             }
             return returnVal;
         }
@@ -316,336 +384,211 @@ namespace DispatchTest
         public int InterfaceGenericConstraint()
         {
             var returnVal = 0;
-            for (var loop = 0; loop < 2000; loop++)
+            for (var loop = 0; loop < InnerLoopCount; loop++)
             {
-                returnVal += IListGenericConstraintLoop(_array);
-                returnVal += IListGenericConstraintLoop(_list);
+                var count = _array.Length;
+                for (var i = 0; i < count; i++)
+                    returnVal += IListGenericConstraintLoop(_array, i);
+                count = _list.Count;
+                for (var i = 0; i < count; i++)
+                    returnVal += IListGenericConstraintLoop(_list, i);
             }
             return returnVal;
         }
 
-        private static int ListLoop(List<int> list)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static int ListLoop(List<int> list, int i)
         {
-            var returnVal = 0;
-            var count = list.Count;
-            for (var i = 0; i < count; i++)
-            {
-                returnVal = list[i];
-            }
-            return returnVal;
+            return list[i];
         }
 
-        private static int ArrayLoop(int[] array)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static int ArrayLoop(int[] array, int i)
         {
-            var returnVal = 0;
-            for (var i = 0; i < array.Length; i++)
-            {
-                returnVal = array[i];
-            }
-            return returnVal;
+            return array[i];
         }
 
-        private int ListListDirectLoop(ListListDirect list)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private int ListListDirectLoop(ListListDirect list, int i)
         {
-            var returnVal = 0;
-            var count = list.Count;
-            for (var i = 0; i < count; i++)
-            {
-                returnVal = list[i];
-            }
-            return returnVal;
+            return list[i];
         }
 
-        private int ArrayListDirectLoop(ArrayListDirect list)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private int ArrayListDirectLoop(ArrayListDirect list, int i)
         {
-            var returnVal = 0;
-            var count = list.Count;
-            for (var i = 0; i < count; i++)
-            {
-                returnVal = list[i];
-            }
-            return returnVal;
+            return list[i];
         }
 
 
-        private int ListListDirectSealedLoop(ListListDirectSealed list)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private int ListListDirectSealedLoop(ListListDirectSealed list, int i)
         {
-            var returnVal = 0;
-            var count = list.Count;
-            for (var i = 0; i < count; i++)
-            {
-                returnVal = list[i];
-            }
-            return returnVal;
+            return list[i];
         }
 
-        private int ArrayListDirectSealedLoop(ArrayListDirectSealed list)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private int ArrayListDirectSealedLoop(ArrayListDirectSealed list, int i)
         {
-            var returnVal = 0;
-            var count = list.Count;
-            for (var i = 0; i < count; i++)
-            {
-                returnVal = list[i];
-            }
-            return returnVal;
+            return list[i];
         }
 
-        private int DirectBaseWrapperLoop(ListVirtual list)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private int DirectBaseWrapperLoop(ListVirtual list, int i)
         {
-            var returnVal = 0;
-            var count = list.Count;
-            for (var i = 0; i < count; i++)
-            {
-                returnVal = list[i];
-            }
-            return returnVal;
+            return list[i];
         }
 
-        private int DirectBaseNotDerivedWrapperLoop(ListVirtualNotDerived list)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private int DirectBaseNotDerivedWrapperLoop(ListVirtualNotDerived list, int i)
         {
-            var returnVal = 0;
-            var count = list.Count;
-            for (var i = 0; i < count; i++)
-            {
-                returnVal = list[i];
-            }
-            return returnVal;
+            return list[i];
         }
 
-        private int ListListDirectVirtualSealedLoop(ListDerivedListSealed list)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private int ListListDirectVirtualSealedLoop(ListDerivedListSealed list, int i)
         {
-            var returnVal = 0;
-            var count = list.Count;
-            for (var i = 0; i < count; i++)
-            {
-                returnVal = list[i];
-            }
-            return returnVal;
+            return list[i];
         }
 
-        private int ArrayListDirectVirtualSealedLoop(ArrayDerivedListSealed list)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private int ArrayListDirectVirtualSealedLoop(ArrayDerivedListSealed list, int i)
         {
-            var returnVal = 0;
-            var count = list.Count;
-            for (var i = 0; i < count; i++)
-            {
-                returnVal = list[i];
-            }
-            return returnVal;
+            return list[i];
         }
 
-        private int ListListDirectVirtualLoop(ListDerivedList list)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private int ListListDirectVirtualLoop(ListDerivedList list, int i)
         {
-            var returnVal = 0;
-            var count = list.Count;
-            for (var i = 0; i < count; i++)
-            {
-                returnVal = list[i];
-            }
-            return returnVal;
+            return list[i];
         }
 
-        private int ArrayListDirectVirtualLoop(ArrayDerivedList list)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private int ArrayListDirectVirtualLoop(ArrayDerivedList list, int i)
         {
-            var returnVal = 0;
-            var count = list.Count;
-            for (var i = 0; i < count; i++)
-            {
-                returnVal = list[i];
-            }
-            return returnVal;
+            return list[i];
         }
 
-        private int ArrayListViaBaseDerivedSealedWrapperLoop(ListVirtual list)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private int ArrayListViaBaseDerivedSealedWrapperLoop(ListVirtual list, int i)
         {
-            var returnVal = 0;
-            var count = list.Count;
-            for (var i = 0; i < count; i++)
-            {
-                returnVal = list[i];
-            }
-            return returnVal;
+            return list[i];
         }
 
-        private int ListListViaBaseDerivedSealedWrapperLoop(ListVirtual list)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private int ListListViaBaseDerivedSealedWrapperLoop(ListVirtual list, int i)
         {
-            var returnVal = 0;
-            var count = list.Count;
-            for (var i = 0; i < count; i++)
-            {
-                returnVal = list[i];
-            }
-            return returnVal;
+            return list[i];
         }
 
-        private int ListListViaBaseDerivedWrapperLoop(ListVirtual list)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private int ListListViaBaseDerivedWrapperLoop(ListVirtual list, int i)
         {
-            var returnVal = 0;
-            var count = list.Count;
-            for (var i = 0; i < count; i++)
-            {
-                returnVal = list[i];
-            }
-            return returnVal;
+            return list[i];
         }
 
-        private int ArrayListViaBaseDerivedWrapperLoop(ListVirtual list)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private int ArrayListViaBaseDerivedWrapperLoop(ListVirtual list, int i)
         {
-            var returnVal = 0;
-            var count = list.Count;
-            for (var i = 0; i < count; i++)
-            {
-                returnVal = list[i];
-            }
-            return returnVal;
+            return list[i];
         }
 
-        private int ViaBaseDerivedWrapperLoop(ListVirtual list)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private int ViaBaseDerivedWrapperLoop(ListVirtual list, int i)
         {
-            var returnVal = 0;
-            var count = list.Count;
-            for (var i = 0; i < count; i++)
-            {
-                returnVal = list[i];
-            }
-            return returnVal;
+            return list[i];
         }
 
-        private int ManualDerivedWrapperPolymorphicLoop(ListVirtual list)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private int ManualDerivedWrapperPolymorphicLoop(ListVirtual list, int i)
         {
             var arrayDerivedList = list as ArrayDerivedList;
             if (arrayDerivedList != null)
             {
-                return ArrayListDirectVirtualLoop(arrayDerivedList);
+                return arrayDerivedList[i];
             }
             var listDerivedList = list as ListDerivedList;
             if (listDerivedList != null)
             {
-                return ListListDirectVirtualLoop(listDerivedList);
+                return listDerivedList[i];
             }
 
-            return ViaBaseGeneralDerivedWrapperLoop(list);
+            return list[i];
         }
 
-        private int ManualDerivedSealedWrapperPolymorphicLoop(ListVirtual list)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private int ManualDerivedSealedWrapperPolymorphicLoop(ListVirtual list, int i)
         {
             var arrayDerivedListSealed = list as ArrayDerivedListSealed;
             if (arrayDerivedListSealed != null)
             {
-                return ArrayListDirectVirtualSealedLoop(arrayDerivedListSealed);
+                return arrayDerivedListSealed[i];
             }
             var listDerivedListSealed = list as ListDerivedListSealed;
             if (listDerivedListSealed != null)
             {
-                return ListListDirectVirtualSealedLoop(listDerivedListSealed);
+                return listDerivedListSealed[i];
             }
 
-            return ViaBaseGeneralDerivedWrapperLoop(list);
+            return list[i];
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private int ViaBaseGeneralDerivedWrapperLoop(ListVirtual list)
+        private static int IListLoop(IList<int> list, int i)
         {
-            var returnVal = 0;
-            var count = list.Count;
-            for (var i = 0; i < count; i++)
-            {
-                returnVal = list[i];
-            }
-            return returnVal;
+            return list[i];
         }
 
-        private static int IListLoop(IList<int> list)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static int IListLoopArrayOnly(IList<int> list, int i)
         {
-            var returnVal = 0;
-            var count = list.Count;
-            for (var i = 0; i < count; i++)
-            {
-                returnVal = list[i];
-            }
-            return returnVal;
+            return list[i];
         }
 
-        private static int IListLoopArrayOnly(IList<int> list)
+        private static int IListLoopListOnly(IList<int> list, int i)
         {
-            var returnVal = 0;
-            var count = list.Count;
-            for (var i = 0; i < count; i++)
-            {
-                returnVal = list[i];
-            }
-            return returnVal;
+            return list[i];
         }
 
-        private static int IListLoopListOnly(IList<int> list)
-        {
-            var returnVal = 0;
-            var count = list.Count;
-            for (var i = 0; i < count; i++)
-            {
-                returnVal = list[i];
-            }
-            return returnVal;
-        }
-
-        private static int IListArrayLoopAsCast(IList<int> ilist)
+        private static int IListArrayLoopAsCast(IList<int> ilist, int i)
         {
             var array = ilist as int[];
             if (array != null)
             {
-                return ArrayLoop(array);
+                return array[i];
             }
-            return IListGeneralLoop(ilist);
+            return ilist[i];
         }
 
-        private static int IListListLoopAsCast(IList<int> ilist)
+        private static int IListListLoopAsCast(IList<int> ilist, int i)
         {
             var list = ilist as List<int>;
             if (list != null)
             {
-                return ListLoop(list);
+                return list[i];
             }
-            return IListGeneralLoop(ilist);
+            return ilist[i];
         }
 
-        private static int IListGenericConstraintLoop<T>(T list) where T : IList<int>
+        private static int IListGenericConstraintLoop<T>(T list, int i) where T : IList<int>
         {
-            var returnVal = 0;
-            var count = list.Count;
-            for (var i = 0; i < count; i++)
-            {
-                returnVal = list[i];
-            }
-            return returnVal;
+            return list[i];
         }
 
-        private static int IListLoopAsCast(IList<int> ilist)
+        private static int IListLoopAsCast(IList<int> ilist, int i)
         {
             var array = ilist as int[];
             if (array != null)
             {
-                return ArrayLoop(array);
+                return array[i];
             }
             var list = ilist as List<int>;
             if (list != null)
             {
-                return ListLoop(list);
+                return list[i];
             }
-            return IListGeneralLoop(ilist);
+            return ilist[i];
         }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static int IListGeneralLoop(IList<int> list)
-        {
-            var returnVal = 0;
-            var count = list.Count;
-            for (var i = 0; i < count; i++)
-            {
-                returnVal = list[i];
-            }
-            return returnVal;
-        }
-
 
         [Setup]
         public void Setup()
