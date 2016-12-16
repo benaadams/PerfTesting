@@ -161,8 +161,8 @@ namespace DispatchTest
             var returnVal = 0;
             for (var loop = 0; loop < 2000; loop++)
             {
-                returnVal += ArrayListDirectVirtualSealedLoop(_arrayListDirectSealed);
-                returnVal += ListListDirectVirtualSealedLoop(_listListDirectSealed);
+                returnVal += ArrayListDirectVirtualSealedLoop(_arrayDerivedListSealed);
+                returnVal += ListListDirectVirtualSealedLoop(_listDerivedListSealed);
             }
             return returnVal;
         }
@@ -235,6 +235,18 @@ namespace DispatchTest
             {
                 returnVal += ManualDerivedWrapperPolymorphicLoop(_baseArrayDerivedList);
                 returnVal += ManualDerivedWrapperPolymorphicLoop(_baseListDerivedList);
+            }
+            return returnVal;
+        }
+
+        [Benchmark(OperationsPerInvoke = InnerLoopCount)]
+        public int ManualDerivedSealedWrapperPolymorphic()
+        {
+            var returnVal = 0;
+            for (var loop = 0; loop < 2000; loop++)
+            {
+                returnVal += ManualDerivedSealedWrapperPolymorphicLoop(_baseArrayDerivedListSealed);
+                returnVal += ManualDerivedSealedWrapperPolymorphicLoop(_baseListDerivedListSealed);
             }
             return returnVal;
         }
@@ -388,7 +400,7 @@ namespace DispatchTest
             return returnVal;
         }
 
-        private int ListListDirectVirtualSealedLoop(ListListDirectSealed list)
+        private int ListListDirectVirtualSealedLoop(ListDerivedListSealed list)
         {
             var returnVal = 0;
             var count = list.Count;
@@ -399,7 +411,7 @@ namespace DispatchTest
             return returnVal;
         }
 
-        private int ArrayListDirectVirtualSealedLoop(ArrayListDirectSealed list)
+        private int ArrayListDirectVirtualSealedLoop(ArrayDerivedListSealed list)
         {
             var returnVal = 0;
             var count = list.Count;
@@ -498,6 +510,22 @@ namespace DispatchTest
             if (listDerivedList != null)
             {
                 return ListListDirectVirtualLoop(listDerivedList);
+            }
+
+            return ViaBaseGeneralDerivedWrapperLoop(list);
+        }
+
+        private int ManualDerivedSealedWrapperPolymorphicLoop(ListVirtual list)
+        {
+            var arrayDerivedListSealed = list as ArrayDerivedListSealed;
+            if (arrayDerivedListSealed != null)
+            {
+                return ArrayListDirectVirtualSealedLoop(arrayDerivedListSealed);
+            }
+            var listDerivedListSealed = list as ListDerivedListSealed;
+            if (listDerivedListSealed != null)
+            {
+                return ListListDirectVirtualSealedLoop(listDerivedListSealed);
             }
 
             return ViaBaseGeneralDerivedWrapperLoop(list);
