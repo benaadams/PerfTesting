@@ -49,4 +49,10 @@ Temporary Items
 bin/
 obj/
 BenchmarkDotNet.Artifacts/
-src/BoxingTest/project.lock.json
+project.lock.json
+AssemblyInfo.cs
+*.user
+*.xproj
+.vs/
+*/.vs/
+*.sln
