@@ -66,6 +66,17 @@ namespace AsciiEncoding
 
         }
 
+        private static ArgumentException GetArgumentException_ThrowBytesOverflow(Encoding encoding) {
+            throw new ArgumentException();
+                //Environment.GetResourceString("Argument_EncodingConversionOverflowBytes",
+                //encoding.EncodingName, encoding.EncoderFallback.GetType()), "bytes");
+        }
+
+        private static void ThrowBytesOverflow(Encoding encoding)
+        {
+            throw GetArgumentException_ThrowBytesOverflow(encoding);
+        }
+
         public unsafe static int GetBytesAsciiFastPath(Encoding encoding, char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex)
         {
             // Fast path for pure ASCII data for ASCII and UTF8 encoding
@@ -80,19 +91,25 @@ namespace AsciiEncoding
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.charCount, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
             if (chars.Length - charIndex < charCount)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.chars, ExceptionResource.ArgumentOutOfRange_IndexCountBuffer);
-            if (byteIndex < 0 || byteIndex > bytes.Length)
+            if (byteIndex < 0)
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.byteIndex, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
+            if (byteIndex > bytes.Length)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.byteIndex, ExceptionResource.ArgumentOutOfRange_Index);
             //Contract.EndContractBlock();
-
             // Note that byteCount is the # of bytes to decode, not the size of the array
             int byteCount = bytes.Length - byteIndex;
+            if (byteCount == 0 && charCount > 0)
+                ThrowBytesOverflow(encoding);
+
             int lengthEncoded;
             if (charCount > 0 && byteCount > 0)
             {
-                fixed (char* input = chars)
-                fixed (byte* output = &bytes[0])
+                fixed (char* pInput = chars)
+                fixed (byte* pOutput = &bytes[0])
                 {
-                    lengthEncoded = GetBytesAsciiFastPath(input + charIndex, output + byteIndex, Math.Min(charCount, byteCount));
+                    char* input = pInput + charIndex;
+                    byte* output = pOutput + byteIndex;
+                    lengthEncoded = GetBytesAsciiFastPath(input, output, Math.Min(charCount, byteCount));
                     if (lengthEncoded < byteCount)
                     {
                         // Not all ASCII, use encoding's GetBytes for remaining conversion
@@ -193,7 +210,9 @@ namespace AsciiEncoding
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.charCount, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
             if (s.Length - charIndex < charCount)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.chars, ExceptionResource.ArgumentOutOfRange_IndexCountBuffer);
-            if (byteIndex < 0 || byteIndex > bytes.Length)
+            if (byteIndex < 0)
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.byteIndex, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
+            if (byteIndex > bytes.Length)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.byteIndex, ExceptionResource.ArgumentOutOfRange_Index);
             //Contract.EndContractBlock();
 
@@ -202,14 +221,16 @@ namespace AsciiEncoding
             int lengthEncoded;
             if (charCount > 0 && byteCount > 0)
             {
-                fixed (char* input = s)
-                fixed (byte* output = &bytes[0])
+                fixed (char* pInput = s)
+                fixed (byte* pOutput = &bytes[0])
                 {
-                    lengthEncoded = GetBytesAsciiFastPath(input + charIndex, output + byteIndex, Math.Min(charCount, byteCount));
+                    char* input = pInput + charIndex;
+                    byte* output = pOutput + byteIndex;
+                    lengthEncoded = GetBytesAsciiFastPath(input, output, Math.Min(charCount, byteCount));
                     if (lengthEncoded < byteCount)
                     {
                         // Not all ASCII, use encoding's GetBytes for remaining conversion
-                        // lengthEncoded += encoding.GetBytesFallback(input + lengthEncoded, charCount - lengthEncoded, output + lengthEncoded, byteCount - lengthEncoded, null);
+                        // lengthEncoded += encoding.GetBytesFallback(input + charIndex + lengthEncoded, charCount - lengthEncoded, output + lengthEncoded, byteCount - lengthEncoded, null);
                         lengthEncoded += encoding.GetBytes(input + lengthEncoded, charCount - lengthEncoded, output + lengthEncoded, byteCount - lengthEncoded);
                     }
                 }
@@ -296,7 +317,7 @@ namespace AsciiEncoding
             {
                 ulong inputUlong0 = *(ulong*)(input + i);
                 ulong inputUlong1 = *(ulong*)(input + i + 4);
-                if (((inputUlong0 | inputUlong1) & 0x8080808080808080) != 0)
+                if (((inputUlong0 | inputUlong1) & 0xFF80FF80FF80FF80) != 0)
                 {
                     goto exit; // Found non-ASCII, bail
                 }
@@ -311,7 +332,7 @@ namespace AsciiEncoding
             if (byteCount - 4 > i)
             {
                 ulong inputUlong = *(ulong*)(input + i);
-                if ((inputUlong & 0x8080808080808080) != 0)
+                if ((inputUlong & 0xFF80FF80FF80FF80) != 0)
                 {
                     goto exit; // Found non-ASCII, bail
                 }
@@ -352,7 +373,7 @@ namespace AsciiEncoding
             for (; i < uintCount; i += 4) {
                 uint inputUint0 = *(uint*)(input + i);
                 uint inputUint1 = *(uint*)(input + i + 2);
-                if (((inputUint0 | inputUint1) & 0x80808080) != 0) {
+                if (((inputUint0 | inputUint1) & 0xFF80FF80) != 0) {
                     goto exit; // Found non-ASCII, bail
                 }
                 // Pack 4 ASCII chars into 4 bytes
@@ -361,7 +382,7 @@ namespace AsciiEncoding
             }
             if (byteCount - 1 > i) {
                 uint inputUint = *(uint*)(input + i);
-                if ((inputUint & 0x80808080) != 0) {
+                if ((inputUint & 0xFF80FF80) != 0) {
                     goto exit; // Found non-ASCII, bail
                 }
                 // Pack 2 ASCII chars into 2 bytes
@@ -509,36 +530,27 @@ namespace AsciiEncoding
 
     public class AltAsciiEncoding : Encoding
     {
-        const int Shift16Shift24 = 256 * 256 * 256 + 256 * 256;
-        const int Shift8Identity = 256 + 1;
-
-        // Used by Encoding.ASCII for lazy initialization
-        // The initialization code will not be run until a static member of the class is referenced
-        internal static readonly AltAsciiEncoding s_default = new AltAsciiEncoding();
-
-
-        // Returns an encoding for the ASCII character set. The returned encoding
-        // will be an instance of the ASCIIEncoding class.
-
+        private static readonly AltAsciiEncoding s_default = new AltAsciiEncoding();
+        private static readonly Encoding InnerEncoding = Encoding.ASCII;
         public static Encoding AltASCII => s_default;
 
         public override byte[] GetBytes(String s)
-            => EncodingForwarder.GetBytesAsciiFastPath(this, s);
+            => EncodingForwarder.GetBytesAsciiFastPath(InnerEncoding, s);
 
         public override int GetBytes(String s, int charIndex, int charCount, byte[] bytes, int byteIndex)
-            => EncodingForwarder.GetBytesAsciiFastPath(this, s, charIndex, charCount, bytes, byteIndex);
+            => EncodingForwarder.GetBytesAsciiFastPath(InnerEncoding, s, charIndex, charCount, bytes, byteIndex);
 
         public override byte[] GetBytes(char[] chars)
-            => EncodingForwarder.GetBytesAsciiFastPath(this, chars, 0, chars.Length);
+            => EncodingForwarder.GetBytesAsciiFastPath(InnerEncoding, chars, 0, chars?.Length ?? 0);
 
         public override byte[] GetBytes(char[] chars, int index, int count)
-            => EncodingForwarder.GetBytesAsciiFastPath(this, chars, index, count);
+            => EncodingForwarder.GetBytesAsciiFastPath(InnerEncoding, chars, index, count);
 
         public override int GetBytes(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex)
-            => EncodingForwarder.GetBytesAsciiFastPath(this, chars, charIndex, charCount, bytes, byteIndex);
+            => EncodingForwarder.GetBytesAsciiFastPath(InnerEncoding, chars, charIndex, charCount, bytes, byteIndex);
 
         public override unsafe int GetBytes(char* chars, int charCount, byte* bytes, int byteCount)
-            => EncodingForwarder.GetBytesAsciiFastPath(this, chars, charCount, bytes, byteCount);
+            => EncodingForwarder.GetBytesAsciiFastPath(InnerEncoding, chars, charCount, bytes, byteCount);
 
         //internal override unsafe int GetBytes(char* chars, int charCount, byte* bytes, int byteCount, EncoderNLS encoder)
         //    => EncodingForwarder.GetBytesAsciiFastPath(this, chars, charCount, bytes, byteCount, encoder);
@@ -557,111 +569,45 @@ namespace AsciiEncoding
 
         //internal override unsafe int GetByteCount(char* chars, int count, EncoderNLS encoder) { }
 
-        public override int GetByteCount(char[] chars, int index, int count)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override int GetCharCount(byte[] bytes, int index, int count)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override int GetMaxByteCount(int charCount)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override int GetMaxCharCount(int byteCount)
-        {
-            throw new NotImplementedException();
-        }
+        public override int GetByteCount(char[] chars, int index, int count) { throw new NotImplementedException(); }
+        public override int GetCharCount(byte[] bytes, int index, int count) { throw new NotImplementedException(); }
+        public override int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex) { throw new NotImplementedException(); }
+        public override int GetMaxByteCount(int charCount) { throw new NotImplementedException(); }
+        public override int GetMaxCharCount(int byteCount) { throw new NotImplementedException(); }
     }
 
-    [Config(typeof(CoreConfig))]
-    public class AsciiEncoding
+
+    public class AltUtf8Encoding : Encoding
     {
-        private const int InnerLoopCount = 20;
+        private static readonly AltUtf8Encoding s_default = new AltUtf8Encoding();
+        private static readonly Encoding InnerEncoding = Encoding.UTF8;
+        public static Encoding AltUtf8 => s_default;
 
-        [Params(
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            14,
-            15,
-            16,
-            17,
-            18,
-            32,
-            63,
-            64,
-            65,
-            128,
-            256,
-            512,
-            1024
-        )]
-        public int StringLength { get; set; }
-        public string data;
+        public override byte[] GetBytes(String s)
+            => EncodingForwarder.GetBytesAsciiFastPath(InnerEncoding, s);
 
-        public Encoding ASCII;
-        public Encoding UTF8;
-        public Encoding AltASCII;
+        public override int GetBytes(String s, int charIndex, int charCount, byte[] bytes, int byteIndex)
+            => EncodingForwarder.GetBytesAsciiFastPath(InnerEncoding, s, charIndex, charCount, bytes, byteIndex);
 
-        [Setup]
-        public unsafe void Setup()
-        {
-            ASCII = Encoding.ASCII;
-            AltASCII = AltAsciiEncoding.AltASCII;
-            UTF8 = Encoding.UTF8;
+        public override byte[] GetBytes(char[] chars)
+            => EncodingForwarder.GetBytesAsciiFastPath(InnerEncoding, chars, 0, chars?.Length ?? 0);
 
-            data = new string('\0', StringLength);
-            fixed (char* pData = data)
-            {
-                for (var i = 0; i < data.Length; i++)
-                {
-                    // ascii chars 32 - 126
-                    pData[i] = (char)((i % (126 - 32)) + 32);
-                }
-            }
-        }
+        public override byte[] GetBytes(char[] chars, int index, int count)
+            => EncodingForwarder.GetBytesAsciiFastPath(InnerEncoding, chars, index, count);
 
-        [Benchmark(OperationsPerInvoke = InnerLoopCount, Baseline =true)]
-        public void ASCIIGetBytes()
-        {
-            for (var loop = 0; loop < InnerLoopCount; loop++)
-            {
-                ASCII.GetBytes(data);
-            }
-        }
+        public override int GetBytes(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex)
+            => EncodingForwarder.GetBytesAsciiFastPath(InnerEncoding, chars, charIndex, charCount, bytes, byteIndex);
 
-        [Benchmark(OperationsPerInvoke = InnerLoopCount)]
-        public void UTF8GetBytes()
-        {
-            for (var loop = 0; loop < InnerLoopCount; loop++)
-            {
-                UTF8.GetBytes(data);
-            }
-        }
+        public override unsafe int GetBytes(char* chars, int charCount, byte* bytes, int byteCount)
+            => EncodingForwarder.GetBytesAsciiFastPath(InnerEncoding, chars, charCount, bytes, byteCount);
 
-        [Benchmark(OperationsPerInvoke = InnerLoopCount)]
-        public void FastPathGetBytes()
-        {
-            for (var loop = 0; loop < InnerLoopCount; loop++)
-            {
-                AltASCII.GetBytes(data);
-            }
-        }
+        //internal override unsafe int GetBytes(char* chars, int charCount, byte* bytes, int byteCount, EncoderNLS encoder)
+        //    => EncodingForwarder.GetBytesAsciiFastPath(InnerEncoding, chars, charCount, bytes, byteCount, encoder);
+
+        public override int GetByteCount(char[] chars, int index, int count) { throw new NotImplementedException(); }
+        public override int GetCharCount(byte[] bytes, int index, int count) { throw new NotImplementedException(); }
+        public override int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex) { throw new NotImplementedException(); }
+        public override int GetMaxByteCount(int charCount) { throw new NotImplementedException(); }
+        public override int GetMaxCharCount(int byteCount) { throw new NotImplementedException(); }
     }
 }
